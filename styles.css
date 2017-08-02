@@ -1,0 +1,48 @@
+/*Pick out colors*/
+
+header {
+  display: flex;
+  flex-direction: row;
+}
+
+header li {
+  display: block;
+  color: black;
+}
+/*
+header ul:nth-child(2) {
+  border: 1px solid green;
+}*/
+
+main ul {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: green;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+
+.card-table li {
+  margin: 10px;
+  width: 13%;
+  height: auto;
+  border: 3px solid black;
+  background-color: white;
+  text-align: center;
+  display: block;
+  color: black;
+}
+
+#list-table .visible {
+  color: red;
+  border: 1px solid red;
+}
+
+#list-table .matched {
+  color: blue;
+  border: 1px solid blue;
+}
