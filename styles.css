@@ -9,6 +9,15 @@ header li {
   display: block;
   color: black;
 }
+
+header h1 {
+  padding: 10px;
+}
+
+ul#header-items {
+  align-items: center;
+  padding: 20px;
+}
 /*
 header ul:nth-child(2) {
   border: 1px solid green;
@@ -29,7 +38,8 @@ main ul {
 .card-table li {
   margin: 10px;
   width: 13%;
-  height: auto;
+  /*height: 26%;*/
+  padding-top: 15%;
   border: 3px solid black;
   background-color: white;
   text-align: center;

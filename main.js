@@ -7,21 +7,27 @@
 
 // For test/build. come back later and have multiple deckSizes
 let deckSize = 24;
+// need to create a health meter - want a bar like on Outthere
 let healthMeter = 10;
-let tries = document.getElementsByTagName("header ul li");
-tries.innerHTML = "Health meter" + healthMeter;
+let headerItems = document.getElementById('header-items');
+// healthMeter is not updating
+headerItems.innerHTML = "Health meter " + healthMeter;
 
-// need to build a deck of pairs, should go 1 to n then 1 to n
+// variables to determine a win
+let pairs = 0;
+let matched = 0;
+
 function buildDeck(deckSize){
     let deck = [];
     for (var i = 0; i < deckSize/2; i++) {
       deck.push(i + 1);
       deck.push(i + 1);
+      pairs += 1;
     }
     console.log(deck);
     return deck;
 }
-// randomly shuffle, should do twice. Returns deck(array) in random order.
+
 function shuffle (deckParam) {
   let i = 0;
   let j = 0;
@@ -44,36 +50,41 @@ let cardTable = document.querySelector( "main > ul" );
 for (var i = 0; i < cardDeck.length; i++) {
   // create nodes
   let card = document.createElement("li");
-  let cardFace = document.createElement("p");
+  // let cardFace = document.createElement("p");
   let cardImage = document.createTextNode(cardDeck[i]);
   // link nodes
   cardTable.appendChild(card);
-  card.appendChild(cardFace);
-  cardFace.appendChild(cardImage);
+  // card.appendChild(cardFace);
+  card.appendChild(cardImage);
   // need to setAttribute for listitems, to give each card a unique ID.
   card.setAttribute("ID", cardDeck[i]);
-  // card.setAttribute("class", "back-side");
+  card.setAttribute("class", "back-side");
 }
 
 let flippedCards = [];
 
 function flipCardFxn(e) {
-
-    e.target.classList.toggle("visible");
-    flippedCards.push(e.target.id);
-    // testing
-    console.log(flippedCards);
-    if(e.target && e.target.nodeName == "LI") {
+  console.log(e.target.classList.value);
+    if (e.target.classList.value === "back-side") {
+      console.log(true);
+      e.target.classList.remove("back-side");
+      e.target.classList.add("visible");
+      flippedCards.push(e.target.id);
+      // testing
+      console.log(flippedCards);
+      if(e.target && e.target.nodeName == "LI") {
         console.log(e.target.id + " was clicked");
         // console.log(e.target.nodeName);
-    }
+      }
     // setTimeout(compareCards(), 2000);
     compareCards();
+  }
 }
 
 let pickedCard = document.querySelector("#list-table");
 pickedCard.addEventListener("click", flipCardFxn, false);
 
+// need to lockout clicking cards that are already clicked or flipped
 function compareCards() {
   // setTimeout(function(), 2000);
   if (flippedCards.length >= 2) {
@@ -85,6 +96,7 @@ function compareCards() {
         match[0].classList.add("matched");
         match[0].classList.remove("visible")
         flippedCards = [];
+        matched += 1;
       }
 
     }
@@ -93,13 +105,24 @@ function compareCards() {
         console.log("no match");
       let purge = document.getElementsByClassName("visible");
       while (purge.length > 0) {
+        purge[0].classList.add("back-side");
       purge[0].classList.remove("visible");
       }
       }, 3000);
       flippedCards = [];
       healthMeter -= 1;
+      headerItems.innerHTML = "Health meter " + healthMeter;
       console.log(healthMeter + "tries left");
     }
   }
+  checkWinLose();
+}
 
+function checkWinLose(matched, pairs) {
+  if (matched === pair) {
+    // win!! - window pops up
+  }
+  if (healthMeter === 0) {
+    // lose!! - window pops up
+  }
 }
