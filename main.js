@@ -14,19 +14,21 @@ let headerItems = document.getElementById('header-items');
 headerItems.innerHTML = "Health meter " + healthMeter;
 
 // variables to determine a win
-let pairs = 0;
+let pairs = deckSize/2;
 let matched = 0;
+console.log(matched + ' ' + pairs);
 
-function buildDeck(deckSize){
+function buildDeck(deckSize, pairs){
     let deck = [];
     for (var i = 0; i < deckSize/2; i++) {
       deck.push(i + 1);
       deck.push(i + 1);
-      pairs += 1;
+      // pairs += 1;
     }
-    console.log(deck);
+    // console.log(deck);
     return deck;
 }
+console.log(matched + ' ' + pairs);
 
 function shuffle (deckParam) {
   let i = 0;
@@ -38,7 +40,7 @@ function shuffle (deckParam) {
     deckParam[i] = deckParam[j];
     deckParam[j] = temp;
   }
-  console.log(deckParam);
+  // console.log(deckParam);
   return deckParam;
 }
 
@@ -63,26 +65,26 @@ for (var i = 0; i < cardDeck.length; i++) {
 
 let flippedCards = [];
 
+let pickedCard = document.querySelector("#list-table");
+pickedCard.addEventListener("click", flipCardFxn, false);
+
 function flipCardFxn(e) {
-  console.log(e.target.classList.value);
-    if (e.target.classList.value === "back-side") {
-      console.log(true);
+  // console.log(e.target.classList.value);
+    if ((e.target.classList.value === "back-side") && (flippedCards.length <= 1)) {
+      // console.log(true);
       e.target.classList.remove("back-side");
       e.target.classList.add("visible");
       flippedCards.push(e.target.id);
       // testing
       console.log(flippedCards);
-      if(e.target && e.target.nodeName == "LI") {
-        console.log(e.target.id + " was clicked");
+      // if(e.target && e.target.nodeName == "LI") {
+        // console.log(e.target.id + " was clicked");
         // console.log(e.target.nodeName);
-      }
+      // }
     // setTimeout(compareCards(), 2000);
     compareCards();
   }
 }
-
-let pickedCard = document.querySelector("#list-table");
-pickedCard.addEventListener("click", flipCardFxn, false);
 
 // need to lockout clicking cards that are already clicked or flipped
 function compareCards() {
@@ -94,11 +96,10 @@ function compareCards() {
       let match = document.getElementsByClassName("visible");
       while (match.length > 0) {
         match[0].classList.add("matched");
-        match[0].classList.remove("visible")
-        flippedCards = [];
-        matched += 1;
+        match[0].classList.remove("visible");
       }
-
+      flippedCards = [];
+      matched += 1;
     }
     else {
       setTimeout(function() {
@@ -108,21 +109,23 @@ function compareCards() {
         purge[0].classList.add("back-side");
       purge[0].classList.remove("visible");
       }
-      }, 3000);
       flippedCards = [];
+      }, 3000);
       healthMeter -= 1;
       headerItems.innerHTML = "Health meter " + healthMeter;
-      console.log(healthMeter + "tries left");
+      // console.log(healthMeter + "tries left");
     }
+    checkWinLose(matched, pairs);
   }
-  checkWinLose();
+  console.log(matched + ' ' + pairs);
 }
 
-function checkWinLose(matched, pairs) {
-  if (matched === pair) {
-    // win!! - window pops up
+function checkWinLose(m, p) {
+  console.log("Matched = " + m + "  " + "Pairs = " + p);
+  if (m === p) {
+    alert("You WIN!!");
   }
   if (healthMeter === 0) {
-    // lose!! - window pops up
+    alert("You Lose!!");
   }
 }
