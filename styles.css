@@ -18,10 +18,15 @@ ul#header-items {
   align-items: center;
   padding: 20px;
 }
+}
 /*
 header ul:nth-child(2) {
   border: 1px solid green;
 }*/
+
+div#timer {
+  border: 2px, solid gray;
+}
 
 main ul {
   margin: 0;
@@ -38,21 +43,34 @@ main ul {
 .card-table li {
   margin: 10px;
   width: 13%;
-  /*height: 26%;*/
-  padding-top: 15%;
+  height: 20%;
+  padding: 0;
+  /*padding-top: 4%;*/
+  /*padding-bottom: 4%;*/
   border: 3px solid black;
-  background-color: white;
+  border-radius: 8px;
+  background-color: transparent;
+  z-index: 100;
   text-align: center;
   display: block;
   color: black;
+  font-size: 12vw;
+}
+
+li img {
+  display: block;
+  margin: auto;
+  width: 100%;
+  object-fit: cover;
+  z-index: 1;
 }
 
 #list-table .visible {
   color: red;
-  border: 1px solid red;
+  border: 3px solid red;
 }
 
 #list-table .matched {
   color: blue;
-  border: 1px solid blue;
+  border: 3px solid blue;
 }
