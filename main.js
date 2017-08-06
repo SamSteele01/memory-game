@@ -1,37 +1,55 @@
 // pick a size of the deck --> dropdown with options --> generate table
-// link numbers to pictures/images, also random
 // buttons in the header: start new game, pause.
 // header needs "health" meter = number of tries <-- changes with difficulty
-// TODO: icons => array -random-> array of decksize/2.length. Match to cards
-// There are 292 images in the icons folder
+// TODO:
 // healthBar images
 // decksize dropdown => grid layouts @media ??
-// image for back-side of cards
 // difficulty dropdown => healthMeter, time held after noMatch
 // high scores - before game - play game button
-
 // For test/build. come back later and have multiple deckSizes
-// need to create a health meter - want a bar like on Outthere-image file
+
 let deckSize = 24;
 let healthMeter = 24;
 let healthMeterStart = healthMeter;
+
 let headerItems = document.getElementById('header-items');
-let timer = document.createElement("div");
+// parent container
+let listItem1 = document.createElement("li");
+let listItem2 = document.createElement("li");
+let listItem3 = document.createElement("li");
+
+headerItems.appendChild(listItem1);
+headerItems.appendChild(listItem2);
+headerItems.appendChild(listItem3);
+
+listItem1.setAttribute("id", "list1");
+listItem2.setAttribute("id", "list2");
+listItem3.setAttribute("id", "list3");
+
 let healthM = document.createElement("div");
+let title = document.createElement("h1");
 let startButton = document.createElement("button");
+let timer = document.createElement("div");
 let difficultyMenu = document.createElement("select");
 let gameSize = document.createElement("select");
-// let style = select images folder.
-let highScores = document.createElement("div");
-headerItems.appendChild(healthM);
-headerItems.appendChild(timer);
-headerItems.appendChild(startButton);
-headerItems.appendChild(difficultyMenu);
-headerItems.appendChild(gameSize);
-headerItems.appendChild(highScores);
-timer.setAttribute("id", "timer");
-healthM.innerHTML = "Health meter " + healthMeter;
+
+// let highScores = document.createElement("div");
+listItem1.appendChild(healthM);
+listItem2.appendChild(title);
+listItem2.appendChild(startButton);
+listItem3.appendChild(timer);
+listItem3.appendChild(difficultyMenu);
+listItem3.appendChild(gameSize);
+
+
+// healthM.innerHTML = "Health meter " + healthMeter;
+title.innerHTML = "Memory Game";
 startButton.innerHTML = "Start";
+timer.setAttribute("id", "timer");
+let optionDiff = document.createElement('option')
+// selectField.appendChild(new Option(option.label, option.value))
+let optionSize = document.createElement('option')
+// selectField.appendChild(new Option(option.label, option.value))
 
 // loop-----
 // let htmlTag = div, button, select,
@@ -52,15 +70,6 @@ let optionLiteral = `
 //
 // }
 
-// function healthMeterEnergyImagesArray(number) {
-//   // make array of totalMismatches.length with different classNames to each target a different CSS style
-//   let arrayToReturn;
-//   for (var i = 0; i < number; i++) {
-//     []
-//   }
-// }
-
-// <div id="timer"></div>
 
 // ------start after here-------
 // function runGame() //{wrap the rest of code?} -- no
@@ -83,12 +92,12 @@ let pairs = deckSize/2;
 let matched = 0;
 // console.log(matched + ' ' + pairs);
 
-function buildDeck(deckSize, pairs){
+function buildDeck(deckSize){
     let deck = [];
     for (var i = 0; i < deckSize/2; i++) {
       deck.push(i + 1);
       deck.push(i + 1);
-      pairs += 1;
+      // pairs += 1;
     }
     // console.log(deck);
     return deck;
@@ -110,17 +119,70 @@ function shuffle (deckParam) {
 }
 let cardDeck = shuffle(buildDeck(deckSize));
 
-// celtic knots folder(15) = ../CelticKnots/
+// celtic knots folder(15) = ./CelticKnots/
 // let imageFolder = document.getElementsByTagName
-// holds a string = file path ex: ""../images/""
-// function buildImgArray(imageFolder, pairs) {
-//
-//   for (var i = 0; i < pairs; i++) {
-//     // images/ => random => (array.length = pairs) | array[i] = fileName
-//   }
-// }
+// holds a string = file path ex: ""./images/""
+let imgArray = [];
+function buildImgArray(imageFolder, imageFile, cardPairs, imgType) {
+  let randomNumber = 0;
+  let randomNumberArray = [];
+  for (var i = 0; i < cardPairs; i++) {
+    randomNumber = Math.floor(Math.random() * 27);
+    if ((randomNumberArray.includes(randomNumber)===false)&&randomNumber!=0) {
+      randomNumberArray.push(randomNumber);
+    }
+    else {
+      i -=1;
+    }
+  }
+  for (var i = 0; i < cardPairs; i++) {
+    imgArray.push("./"+imageFolder+"/"+imageFile+"-"+randomNumberArray[i]+"."+imgType+"");
+  }
+}
+buildImgArray("CelticKnots", "Celtic-knot", pairs, "jpg");
+console.log(imgArray);
 
-// need to assign images to cards by number. Return array of objects.
+// TODO: replace inject with DOM target.
+heartImgArray = [
+  "./Hearts/Empty-heart.png", "./Hearts/Half-heart.png", "./Hearts/Full-heart.png"
+]
+let totalHearts = healthMeterStart/2;
+// keeps adding hearts - need to seperate build and update?
+let heart = [];
+function createHearts() {
+  for (var i = 0; i < totalHearts; i++) {
+    heart[i] = document.createElement("img");
+    healthM.appendChild(heart[i]);
+    heart[i].setAttribute("src", heartImgArray[2]);
+  }
+}
+createHearts();
+
+function updateHearts() {
+  let restAreEmpty = false;
+  let h = 0;
+  for (var i = 0; i < totalHearts; i++) {
+    if (restAreEmpty) {
+      heart[i].setAttribute("src", heartImgArray[0]);
+    }
+    else {
+      h +=1;
+      if (healthMeter > h*(heartImgArray.length-1)) {
+        heart[i].setAttribute("src", heartImgArray[2]);
+      }
+      else {
+        if (healthMeter === h*(heartImgArray.length-1)) {
+          heart[i].setAttribute("src", heartImgArray[2]);
+        }
+        if (healthMeter === (h*(heartImgArray.length-1))-1) {
+        heart[i].setAttribute("src", heartImgArray[1]);
+        }
+        restAreEmpty = true;
+      }
+    }
+  }
+}
+updateHearts();
 
 let cardTable = document.querySelector( "main > ul" );
 for (var i = 0; i < cardDeck.length; i++) {
@@ -128,15 +190,15 @@ for (var i = 0; i < cardDeck.length; i++) {
   let cardImage = document.createElement("img");
   cardTable.appendChild(card);
   card.appendChild(cardImage);
-  cardImage.setAttribute("src", "../CelticKnots/Celtic-knot-black.jpg");
+  cardImage.setAttribute("src", "./CelticKnots/Celtic-knot-black.jpg");
   cardImage.setAttribute("class", "back-side");
   cardImage.setAttribute("ID", cardDeck[i]);
   // let cardImage = document.createTextNode(cardDeck[i]);
   // card.appendChild(cardImage);
   // card.setAttribute("ID", cardDeck[i]);
   // card.setAttribute("class", "back-side");
-  // document.getElementsByTagName('li')[i].setAttribute("background-image", "src='../CelticKnots/Celtic-knot-black.jpg'");
-  // document.locate("li img").setCSS("background-image", "../CelticKnots/"+[i]+".jpg")
+  // document.getElementsByTagName('li')[i].setAttribute("background-image", "src='./CelticKnots/Celtic-knot-black.jpg'");
+  // document.locate("li img").setCSS("background-image", "./CelticKnots/"+[i]+".jpg")
 }
 
 // wrap in a loop or map--------
@@ -152,7 +214,7 @@ let cardLiteral = `
 // -------
 //
 // let stringTargetFile = `
-// "../${imgFolder}/${pictureName}+e.target.id+${imgType}"
+// "./${imgFolder}/${pictureName}+e.target.id+${imgType}"
 // `
 // imgFolder = CelticKnots,
 
@@ -166,22 +228,16 @@ function flipCardFxn(e) {
       e.target.classList.add("visible");
       flippedCards.push(e.target);
       flippedCardsId.push(e.target.id);
-      // e.target.setAttribute("src", "../CelticKnots/Celtic-knot-"+e.target.id+".jpg");
-      // lockout click listener - set to false
       console.log(e.target);
-      // spinFlipped(e.target);
       spinFlipped(e.target);
       compareCards();
     }
 }
 
 function compareCards() {
-  // console.log(flippedCards); [img#12.visible]
-  // console.log(flippedCardsId); ["12"]
   if (flippedCardsId.length >= 2) {
-    // console.log(e.target);
     if (flippedCardsId[0] === flippedCardsId[1]) {
-      console.log("match");
+      let secondCardShows = setTimeout(function() {
       let match = document.getElementsByClassName("visible");
       while (match.length > 0) {
         match[0].classList.add("matched");
@@ -189,64 +245,53 @@ function compareCards() {
       }
       flippedCardsId = [];
       flippedCards = [];
+      }, 1000);
       matched += 1;
-
     }
     else {
       let noMatch = setTimeout(function() {
       let purge = document.getElementsByClassName("visible");
       while (purge.length > 0) {
-        console.log(flippedCards[0]);
         purge[0].classList.add("back-side");
         purge[0].classList.remove("visible");
         spinFlipped(flippedCards[0]);
         flippedCards.shift()
-        // purge[0].setAttribute("src", "../CelticKnots/Celtic-knot-black.jpg");
-        // spinFlipped(purge[0]); only spins one back
-        // spinFlipped(flippedCards[0]);
       }
       flippedCardsId = [];
       flippedCards = [];
       }, 3000);
       healthMeter -= 1;
-      // document.getElementsByTagName('div').setAttribute("width", (100/healthMeterStart*healthMeter)+"%");
-      healthM.innerHTML = "Health meter " + healthMeter;
-      // console.log(healthMeter + "tries left");
+      updateHearts();
     }
-    checkWinLose(matched, pairs);
+    checkWinLose(matched, cardPairs);
   }
-  // console.log(matched + ' ' + pairs);
+  console.log(matched + ' ' + cardPairs);
 }
 
 function changeImages(theCard) {
-  // console.log(e.target); --- uncaught ReferenceError: e is not defined
-  console.log(theCard); /*id#*/
+  console.log(theCard);
   if (theCard.classList.value === "visible") {
-    theCard.setAttribute("src", "../CelticKnots/Celtic-knot-"+theCard.id+".jpg");
+    theCard.setAttribute("src", imgArray[theCard.id-1]);
   }
-  // console.log(document.getElementById(theCard));
-  // console.log(document.getElementsByTagName("img"));
   if (theCard.classList.value === "back-side") {
-  theCard.setAttribute("src", "../CelticKnots/Celtic-knot-black.jpg");
+  theCard.setAttribute("src", "./CelticKnots/Celtic-knot-black.jpg");
   }
 }
 
 // Ha ha ha ha ha! this is badass!!
 function spinFlipped(theCard) {
     console.log("flipping"+theCard);
-    // let bulba = this;
     let degrees = 180;
     let flip = setInterval(frame,10);
     function frame() {
       if(degrees === 90){
         if (theCard.classList.value === "visible") {
-        theCard.setAttribute("src", "../CelticKnots/Celtic-knot-"+theCard.id+".jpg");
+        theCard.setAttribute("src", imgArray[theCard.id-1]);
         }
         if (theCard.classList.value === "back-side") {
-        theCard.setAttribute("src", "../CelticKnots/Celtic-knot-black.jpg");
+        theCard.setAttribute("src", "./CelticKnots/Celtic-knot-black.jpg");
         }
       }
-        // let toFlip = document.getElementsByClassName("visible");
       if(degrees <= 0){
         clearInterval(flip);
       }
@@ -259,7 +304,7 @@ function spinFlipped(theCard) {
 }
 
 function checkWinLose(m, p) {
-  console.log("Matched = " + m + "  " + "Pairs = " + p);
+  console.log("Matched = " + m + "  " + "cardPairs = " + p);
   if (m === p) {
     // want to record time to complete -- tries left -- high scores -- points -- name?
     alert("You WIN!! \n With "+healthMeter+" moves left!");
