@@ -1,110 +1,166 @@
-// pick a size of the deck --> dropdown with options --> generate table
-// buttons in the header: start new game, pause.
-// header needs "health" meter = number of tries <-- changes with difficulty
-// TODO:
-// healthBar images
-// decksize dropdown => grid layouts @media ??
-// difficulty dropdown => healthMeter, time held after noMatch
-// high scores - before game - play game button
-// For test/build. come back later and have multiple deckSizes
+// Header ----------------------------------
 
-let deckSize = 24;
-let healthMeter = 24;
-let healthMeterStart = healthMeter;
-
-let headerItems = document.getElementById('header-items');
-// parent container
-let listItem1 = document.createElement("li");
-let listItem2 = document.createElement("li");
-let listItem3 = document.createElement("li");
-
-headerItems.appendChild(listItem1);
-headerItems.appendChild(listItem2);
-headerItems.appendChild(listItem3);
-
-listItem1.setAttribute("id", "list1");
-listItem2.setAttribute("id", "list2");
-listItem3.setAttribute("id", "list3");
-
-let healthM = document.createElement("div");
+let header = document.getElementById('header');
 let title = document.createElement("h1");
-let startButton = document.createElement("button");
-let timer = document.createElement("div");
+title.innerHTML = "Memory Game";
+
+let leftColumn = document.createElement("li");
+let centerColumn = document.createElement("li");
+let rightColumn = document.createElement("li");
+
+header.appendChild(leftColumn);
+header.appendChild(centerColumn);
+header.appendChild(rightColumn);
+
+leftColumn.setAttribute("class", "header-col");
+centerColumn.setAttribute("class", "header-col");
+rightColumn.setAttribute("class", "header-col");
+
+let diffLabel = document.createElement("h3");
 let difficultyMenu = document.createElement("select");
+let themeLabel = document.createElement("h3");
+let theme = document.createElement("select");
+let startButton = document.createElement("button");
+let sizeLabel = document.createElement("h3");
 let gameSize = document.createElement("select");
 
-// let highScores = document.createElement("div");
-listItem1.appendChild(healthM);
-listItem2.appendChild(title);
-listItem2.appendChild(startButton);
-listItem3.appendChild(timer);
-listItem3.appendChild(difficultyMenu);
-listItem3.appendChild(gameSize);
+diffLabel.innerHTML = "Select Difficulty";
+leftColumn.appendChild(diffLabel);
+leftColumn.appendChild(difficultyMenu);
 
+themeLabel.innerHTML = "Select Theme";
+centerColumn.appendChild(themeLabel);
+centerColumn.appendChild(theme);
+centerColumn.appendChild(startButton);
 
-// healthM.innerHTML = "Health meter " + healthMeter;
-title.innerHTML = "Memory Game";
+sizeLabel.innerHTML = "Select Game Size";
+rightColumn.appendChild(sizeLabel);
+rightColumn.appendChild(gameSize);
+
+difficultyMenu.appendChild(new Option("Easy", 3));
+difficultyMenu.appendChild(new Option("Medium", 2));
+difficultyMenu.appendChild(new Option("Hard", 1));
+
+theme.appendChild(new Option("Celtic Knots", "knots"));
+theme.appendChild(new Option("Flames", "flames"));
 startButton.innerHTML = "Start";
-timer.setAttribute("id", "timer");
-let optionDiff = document.createElement('option')
-// selectField.appendChild(new Option(option.label, option.value))
-let optionSize = document.createElement('option')
-// selectField.appendChild(new Option(option.label, option.value))
 
-// loop-----
-// let htmlTag = div, button, select,
-let className = "header-bar";
-// let idName = timer, healthM, startButton, difficultyMenu, styleMenu, gameSize, highScores
-// let headerItemLiteral = `
-// <${htmlTag} class="${className}" id="${idName}">
-//   <input type="text" name="" value="">`;
-
-let optionName = "";
-let optionLiteral = `
-<option name="sc" value="sc">${optionName}</option>`;
-
-// startButton.addEventListener("click", runGame, false);
-//
-// function createSizeArray() {
-//   let arrayToReturn = [];
-//
-// }
+gameSize.appendChild(new Option("6 pairs", 6));
+gameSize.appendChild(new Option("9 pairs", 9));
+gameSize.appendChild(new Option("12 pairs", 12));
 
 
-// ------start after here-------
-// function runGame() //{wrap the rest of code?} -- no
-// setInterval(wait) get out with start button click
-// <div id ="start_timer" onclick="clearInterval(timerVar)">Start game</div>
+// main --------------------------------------
 
-var timerVar = setInterval(countTimer, 1000);
+let main = document.getElementsByTagName("main");
+// let highScores = require("./highScores"); // doesn't work
+// console.log("highScores", highScores);
+
+// let highScoresTable = document.createElement("table");
+// main.appendChild(highScoresTable);
+// let tableHeader = document.createElement("th");
+// tableHeader.innerHTML = "High Scores";
+// highScoresTable.appendChild(tableHeader);
+// 
+// highScores.map((row) => {
+//   let tableRow = document.createElement("tr");
+//   let rank = document.createElement("td");
+//   rank.innerHTML = row.rank;
+//   tableRow.appendChild(rank);
+//   let score = document.createElement("td");
+//   score.innerHTML = row.score;
+//   tableRow.appendChild(score);
+//   let name = document.createElement("td");
+//   name.innerHTML = row.name;
+//   tableRow.appendChild(name);
+//   highScoresTable.appendChild(tableRow);
+// })
+
+startButton.addEventListener("click", runGame, false);
+
+var matched = 0;
+let pairs = 0;
 var totalSeconds = 0;
+var flippedCards = [];
+var flippedCardsId = [];
+let numberOfMoves = 0;
+let totalHearts = 0;
+let hearts = [];
+var heartImgArray = [
+  "./Hearts/Empty-heart.png", "./Hearts/Half-heart.png", "./Hearts/Full-heart.png"
+];
+let imageArray = [];
+let backSideImg = "";
+
+// await start -----------------------------
+
+function runGame() {
+  // get values
+  numberOfMoves = difficultyMenu.value * gameSize.value;
+  let themeFolder = theme.value;
+  pairs = gameSize.value;
+  
+  // clear header and table
+  leftColumn.removeChild(diffLabel);
+  leftColumn.removeChild(difficultyMenu);
+  centerColumn.removeChild(themeLabel);
+  centerColumn.removeChild(theme);
+  centerColumn.removeChild(startButton);
+  rightColumn.removeChild(sizeLabel);
+  rightColumn.removeChild(gameSize);
+  // main.removeChild(highScoresTable);
+  
+  // change Header
+  
+  var healthMeter = document.createElement("div");
+  healthMeter.setAttribute("id", "health-meter");
+  leftColumn.appendChild(healthMeter);
+  var timer = document.createElement("div");
+  timer.setAttribute("id", "timer");
+  rightColumn.appendChild(timer);
+   
+  createHearts(numberOfMoves);
+
+  let cardDeck = shuffle(buildDeck(pairs));
+  imageArray = buildImgArray(themeFolder, pairs);
+  
+  let cardTable = document.querySelector( "main > ul" );
+  cardTable.setAttribute("class", "card-table");
+  for (var i = 0; i < cardDeck.length; i++) {
+    let card = document.createElement("li");
+    let cardImage = document.createElement("img");
+    cardTable.appendChild(card);
+    card.appendChild(cardImage);
+    cardImage.setAttribute("src", backSideImg);
+    cardImage.setAttribute("class", "back-side");
+    cardImage.setAttribute("ID", cardDeck[i]);
+  };
+  
+  var timerVar = setInterval(countTimer, 1000);
+
+};
+
 function countTimer() {
-   ++totalSeconds;
-   var hour = Math.floor(totalSeconds /3600);
-   var minute = Math.floor((totalSeconds - hour*3600)/60);
-   if (minute < 10) {minute = "0" + minute};
-   var seconds = totalSeconds - (hour*3600 + minute*60);
-   if (seconds < 10) {seconds = "0" + seconds};
-   document.getElementById("timer").innerHTML = hour + ":" + minute + ":" + seconds;
-}
+  ++totalSeconds;
+  var hour = Math.floor(totalSeconds / 3600);
+  var minute = Math.floor((totalSeconds - hour * 3600) / 60);
+  if (minute < 10) {minute = "0" + minute};
+  var seconds = totalSeconds - (hour * 3600 + minute * 60);
+  if (seconds < 10) {seconds = "0" + seconds};
+  document.getElementById("timer").innerHTML = hour + ":" + minute + ":" + seconds;
+};
 
-let pairs = deckSize/2;
-let matched = 0;
-// console.log(matched + ' ' + pairs);
+function buildDeck(pairs){
+  let deck = [];
+  for (let i = 0; i < pairs; i++) {
+    deck.push(i + 1);
+    deck.push(i + 1);
+  }
+  // console.log(deck);
+  return deck;
+}  
 
-function buildDeck(deckSize){
-    let deck = [];
-    for (var i = 0; i < deckSize/2; i++) {
-      deck.push(i + 1);
-      deck.push(i + 1);
-      // pairs += 1;
-    }
-    // console.log(deck);
-    return deck;
-}
-// console.log(matched + ' ' + pairs);
-
-function shuffle (deckParam) {
+function shuffle(deckParam) {
   let i = 0;
   let j = 0;
   let temp = null;
@@ -117,18 +173,32 @@ function shuffle (deckParam) {
   // console.log(deckParam);
   return deckParam;
 }
-let cardDeck = shuffle(buildDeck(deckSize));
 
-// celtic knots folder(15) = ./CelticKnots/
-// let imageFolder = document.getElementsByTagName
-// holds a string = file path ex: ""./images/""
-let imgArray = [];
-function buildImgArray(imageFolder, imageFile, cardPairs, imgType) {
+function buildImgArray(themeFolder, cardPairs) {
+  let imageFolder = "";
+  let imageFile = "";
+  let numberOfOptions = 0;
+  
+  if (themeFolder === "knots") {
+    imageFolder = "CelticKnots";
+    imageFile = "Celtic-knot";
+    numberOfOptions = 27;
+    backSideImg = "./CelticKnots/celtic-knot-back.png"
+  }
+  if (themeFolder === "flames") {
+    imageFolder = "Flames";
+    imageFile = "flame";
+    numberOfOptions = 10;
+    backSideImg = "./Flames/flame-back.svg"
+  }
+  
+  let imgArray = [];
   let randomNumber = 0;
   let randomNumberArray = [];
+  
   for (var i = 0; i < cardPairs; i++) {
-    randomNumber = Math.floor(Math.random() * 27);
-    if ((randomNumberArray.includes(randomNumber)===false)&&randomNumber!=0) {
+    randomNumber = Math.floor(Math.random() * numberOfOptions);
+    if ((randomNumberArray.includes(randomNumber) === false) && randomNumber != 0) {
       randomNumberArray.push(randomNumber);
     }
     else {
@@ -136,90 +206,70 @@ function buildImgArray(imageFolder, imageFile, cardPairs, imgType) {
     }
   }
   for (var i = 0; i < cardPairs; i++) {
-    imgArray.push("./"+imageFolder+"/"+imageFile+"-"+randomNumberArray[i]+"."+imgType+"");
+    imgArray.push("./"+imageFolder+"/"+imageFile+"-"+randomNumberArray[i]+".jpg");
   }
+  return imgArray;
 }
-buildImgArray("CelticKnots", "Celtic-knot", pairs, "jpg");
-console.log(imgArray);
 
-// TODO: replace inject with DOM target.
-heartImgArray = [
-  "./Hearts/Empty-heart.png", "./Hearts/Half-heart.png", "./Hearts/Full-heart.png"
-]
-let totalHearts = healthMeterStart/2;
-// keeps adding hearts - need to seperate build and update?
-let heart = [];
-function createHearts() {
+function createHearts(numberOfMoves) {
+  totalHearts = Math.floor(numberOfMoves / 2);
+  let halfHeart = numberOfMoves % 2;
+  
   for (var i = 0; i < totalHearts; i++) {
-    heart[i] = document.createElement("img");
-    healthM.appendChild(heart[i]);
-    heart[i].setAttribute("src", heartImgArray[2]);
+    hearts[i] = document.createElement("img");
+    hearts[i].setAttribute("src", heartImgArray[2]);
+    document.getElementById("health-meter").appendChild(hearts[i]);
   }
-}
-createHearts();
+
+  if (halfHeart) {
+    hearts[totalHearts] = document.createElement("img");
+    hearts[totalHearts].setAttribute("src", heartImgArray[1]);
+    document.getElementById("health-meter").appendChild(hearts[totalHearts]);
+  }
+  
+};
 
 function updateHearts() {
   let restAreEmpty = false;
   let h = 0;
-  for (var i = 0; i < totalHearts; i++) {
+  // console.log('HEARTS.LENGTH', hearts.length);
+  for (var i = 0; i < hearts.length; i++) {
     if (restAreEmpty) {
-      heart[i].setAttribute("src", heartImgArray[0]);
+      // fill with white hearts
+      hearts[i].setAttribute("src", heartImgArray[0]);
     }
     else {
       h +=1;
-      if (healthMeter > h*(heartImgArray.length-1)) {
-        heart[i].setAttribute("src", heartImgArray[2]);
+      if (numberOfMoves > h*(heartImgArray.length-1)) {
+        hearts[i].setAttribute("src", heartImgArray[2]);
       }
       else {
-        if (healthMeter === h*(heartImgArray.length-1)) {
-          heart[i].setAttribute("src", heartImgArray[2]);
+        // last heart
+        if (numberOfMoves === h*(heartImgArray.length-1)) {
+          // full heart
+          hearts[i].setAttribute("src", heartImgArray[2]);
         }
-        if (healthMeter === (h*(heartImgArray.length-1))-1) {
-        heart[i].setAttribute("src", heartImgArray[1]);
+        if (numberOfMoves === (h*(heartImgArray.length-1))-1) {
+          // half heart
+        hearts[i].setAttribute("src", heartImgArray[1]);
         }
         restAreEmpty = true;
       }
     }
   }
 }
-updateHearts();
+// updateHearts(); // may not need
 
-let cardTable = document.querySelector( "main > ul" );
-for (var i = 0; i < cardDeck.length; i++) {
-  let card = document.createElement("li");
-  let cardImage = document.createElement("img");
-  cardTable.appendChild(card);
-  card.appendChild(cardImage);
-  cardImage.setAttribute("src", "./CelticKnots/Celtic-knot-black.jpg");
-  cardImage.setAttribute("class", "back-side");
-  cardImage.setAttribute("ID", cardDeck[i]);
-  // let cardImage = document.createTextNode(cardDeck[i]);
-  // card.appendChild(cardImage);
-  // card.setAttribute("ID", cardDeck[i]);
-  // card.setAttribute("class", "back-side");
-  // document.getElementsByTagName('li')[i].setAttribute("background-image", "src='./CelticKnots/Celtic-knot-black.jpg'");
-  // document.locate("li img").setCSS("background-image", "./CelticKnots/"+[i]+".jpg")
-}
+// let cardClassName = "back-side";
+// let cardIdName = "cardDeck[i]";
+// let backSideImg = "back-side-img";
+// let cardImg = "cardImage[i]"
+// 
+// let cardLiteral = `
+// <li class="${cardClassName}" id="${cardIdName}">
+//   <img src="${cardImg}" alt="">
+// </li>`
 
-// wrap in a loop or map--------
-let cardClassName = "back-side";
-let cardIdName = "cardDeck[i]";
-let backSideImg = "back-side-img";
-let cardImg = "cardImage[i]"
-
-let cardLiteral = `
-<li class="${cardClassName}" id="${cardIdName}">
-  <img src="${cardImg}" alt="">
-</li>`
-// -------
-//
-// let stringTargetFile = `
-// "./${imgFolder}/${pictureName}+e.target.id+${imgType}"
-// `
-// imgFolder = CelticKnots,
-
-let flippedCards = [];
-let flippedCardsId = [];
 let pickedCard = document.querySelector("#list-table");
 pickedCard.addEventListener("click", flipCardFxn, false);
 function flipCardFxn(e) {
@@ -228,68 +278,68 @@ function flipCardFxn(e) {
       e.target.classList.add("visible");
       flippedCards.push(e.target);
       flippedCardsId.push(e.target.id);
-      console.log(e.target);
+      // console.log(e.target);
       spinFlipped(e.target);
       compareCards();
     }
-}
+};
 
 function compareCards() {
   if (flippedCardsId.length >= 2) {
     if (flippedCardsId[0] === flippedCardsId[1]) {
       let secondCardShows = setTimeout(function() {
-      let match = document.getElementsByClassName("visible");
-      while (match.length > 0) {
-        match[0].classList.add("matched");
-        match[0].classList.remove("visible");
-      }
-      flippedCardsId = [];
-      flippedCards = [];
+        let match = document.getElementsByClassName("visible");
+        while (match.length > 0) {
+          match[0].classList.add("matched");
+          match[0].classList.remove("visible");
+        };
+        flippedCardsId = [];
+        flippedCards = [];
+        matched += 1;
+        checkWinLose(matched, pairs);
       }, 1000);
-      matched += 1;
     }
     else {
       let noMatch = setTimeout(function() {
-      let purge = document.getElementsByClassName("visible");
-      while (purge.length > 0) {
-        purge[0].classList.add("back-side");
-        purge[0].classList.remove("visible");
-        spinFlipped(flippedCards[0]);
-        flippedCards.shift()
-      }
-      flippedCardsId = [];
-      flippedCards = [];
+        let purge = document.getElementsByClassName("visible");
+        while (purge.length > 0) {
+          purge[0].classList.add("back-side");
+          purge[0].classList.remove("visible");
+          spinFlipped(flippedCards[0]);
+          flippedCards.shift()
+        }
+        flippedCardsId = [];
+        flippedCards = [];
+        numberOfMoves -= 1;
+        updateHearts();
       }, 3000);
-      healthMeter -= 1;
-      updateHearts();
     }
-    checkWinLose(matched, cardPairs);
+    checkWinLose(matched, pairs);
   }
-  console.log(matched + ' ' + cardPairs);
-}
+};
 
-function changeImages(theCard) {
-  console.log(theCard);
-  if (theCard.classList.value === "visible") {
-    theCard.setAttribute("src", imgArray[theCard.id-1]);
-  }
-  if (theCard.classList.value === "back-side") {
-  theCard.setAttribute("src", "./CelticKnots/Celtic-knot-black.jpg");
-  }
-}
+// function changeImages(theCard) {
+//   console.log(theCard);
+//   if (theCard.classList.value === "visible") {
+//     theCard.setAttribute("src", imageArray[theCard.id-1]);
+//   }
+//   if (theCard.classList.value === "back-side") {
+//   theCard.setAttribute("src", "./CelticKnots/celtic-knot-back.png");
+//   }
+// };
 
 // Ha ha ha ha ha! this is badass!!
 function spinFlipped(theCard) {
-    console.log("flipping"+theCard);
+    // console.log("flipping"+theCard);
     let degrees = 180;
-    let flip = setInterval(frame,10);
+    let flip = setInterval(frame, 7);
     function frame() {
       if(degrees === 90){
         if (theCard.classList.value === "visible") {
-        theCard.setAttribute("src", imgArray[theCard.id-1]);
+        theCard.setAttribute("src", imageArray[theCard.id-1]);
         }
         if (theCard.classList.value === "back-side") {
-        theCard.setAttribute("src", "./CelticKnots/Celtic-knot-black.jpg");
+        theCard.setAttribute("src", backSideImg);
         }
       }
       if(degrees <= 0){
@@ -297,21 +347,21 @@ function spinFlipped(theCard) {
       }
       else{
         degrees--;
-        console.log(theCard);
+        // console.log(theCard);
         theCard.style.transform = "rotateY("+degrees+"deg)"
       }
     }
 }
 
 function checkWinLose(m, p) {
-  console.log("Matched = " + m + "  " + "cardPairs = " + p);
+  console.log("Matched = " + m + "  cardPairs = " + p);
   if (m === p) {
     // want to record time to complete -- tries left -- high scores -- points -- name?
-    alert("You WIN!! \n With "+healthMeter+" moves left!");
+    alert("You WIN!! \n With "+ numberOfMoves +" moves left!");
     // stop timer
     // enter your name
   }
-  if (healthMeter === 0) {
-    alert("You Lose!!\n You made " + pairs + "pairs.");
+  if (numberOfMoves === 0) {
+    alert("You Lose!!\n You made " + m + "pairs.");
   }
 }
