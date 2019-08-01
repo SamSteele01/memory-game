@@ -76,7 +76,7 @@ let main = document.getElementsByTagName("main");
 //   highScoresTable.appendChild(tableRow);
 // })
 
-startButton.addEventListener("click", runGame, false);
+startButton.addEventListener("click", setUpGame, false);
 
 var matched = 0;
 let pairs = 0;
@@ -94,7 +94,7 @@ let backSideImg = "";
 
 // await start -----------------------------
 
-function runGame() {
+function setUpGame() {
   // get values
   numberOfMoves = difficultyMenu.value * gameSize.value;
   let themeFolder = theme.value;
@@ -188,7 +188,7 @@ function buildImgArray(themeFolder, cardPairs) {
   if (themeFolder === "flames") {
     imageFolder = "Flames";
     imageFile = "flame";
-    numberOfOptions = 10;
+    numberOfOptions = 13;
     backSideImg = "./Flames/flame-back.svg"
   }
   
@@ -197,7 +197,7 @@ function buildImgArray(themeFolder, cardPairs) {
   let randomNumberArray = [];
   
   for (var i = 0; i < cardPairs; i++) {
-    randomNumber = Math.floor(Math.random() * numberOfOptions);
+    randomNumber = Math.floor(Math.random() * numberOfOptions + 1);
     if ((randomNumberArray.includes(randomNumber) === false) && randomNumber != 0) {
       randomNumberArray.push(randomNumber);
     }
@@ -205,6 +205,7 @@ function buildImgArray(themeFolder, cardPairs) {
       i -=1;
     }
   }
+  // console.log('RANDOMNUMBERARRAY', randomNumberArray);
   for (var i = 0; i < cardPairs; i++) {
     imgArray.push("./"+imageFolder+"/"+imageFile+"-"+randomNumberArray[i]+".jpg");
   }
@@ -355,10 +356,11 @@ function spinFlipped(theCard) {
 
 function checkWinLose(m, p) {
   console.log("Matched = " + m + "  cardPairs = " + p);
-  if (m === p) {
+  if (m == p) {
     // want to record time to complete -- tries left -- high scores -- points -- name?
     alert("You WIN!! \n With "+ numberOfMoves +" moves left!");
     // stop timer
+    
     // enter your name
   }
   if (numberOfMoves === 0) {
